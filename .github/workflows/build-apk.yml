@@ -34,16 +34,22 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
-      - name: Install Buildozer & Dependencies
+      - name: Install Buildozer
         run: |
           pip install --upgrade "pip<24.1" "setuptools<70.0.0" wheel
           pip install "cython<3.0.0" git+https://github.com/kivy/buildozer.git
+
+      - name: Accept SDK Licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          yes | sdkmanager --licenses || true
 
       - name: Build Android APK
         run: |
           export CI=true
           export BUILDOZER_ALLOW_ROOT=1
-          yes | buildozer -v android debug
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
