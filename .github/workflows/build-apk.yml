@@ -32,22 +32,23 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
       - name: Install Buildozer & Cython
         run: |
           pip install --upgrade "pip<24.1" "setuptools<70.0.0" wheel
-          pip install "cython<3.0.0" git+https://github.com/kivy/buildozer.git
+          pip install "cython<3.0.0" buildozer
 
-      - name: Pre-accept Android SDK Licenses
+      - name: Accept Licenses & Link SDK
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          yes | sdkmanager --licenses || true
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          cp -r /usr/local/lib/android/sdk/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build Android APK
+        env:
+          ANDROIDSDK: ${{ env.ANDROID_HOME }}
+          ANDROIDNDK: ${{ env.ANDROID_NDK_LATEST_HOME }}
         run: |
           export CI=true
           export BUILDOZER_ALLOW_ROOT=1
