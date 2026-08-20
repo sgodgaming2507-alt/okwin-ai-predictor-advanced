@@ -19,8 +19,10 @@ source.include_exts = py,png,jpg,kv,atlas
 version = 0.1
 
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy==2.2.1,requests,urllib3,charset_normalizer,idna
+requirements = python3,kivy==2.3.0,requests,urllib3,charset_normalizer,idna,certifi,openssl
+
+# (str) python-for-android branch to use
+p4a.branch = master
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -28,7 +30,7 @@ orientation = portrait
 # (bool) Indicate if the application should be fullscreen
 fullscreen = 0
 
-# (int) Target Android API, should be as high as possible.
+# (int) Target Android API
 android.api = 33
 
 # (int) Minimum API your APK / AAB will support.
@@ -43,16 +45,16 @@ android.logcat_filters = *:S python:D
 # (bool) Copy library instead of making a libpymodules.so
 android.copy_libs = 1
 
-# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
+# (str) The Android arch to build for
 android.archs = arm64-v8a
 
-# (bool) enables Android auto backup feature (Android API >=23)
+# (bool) enables Android auto backup feature
 android.allow_backup = True
 
 [buildozer]
 
-# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
+# (int) Log level (0 = error only, 1 = info, 2 = debug)
 log_level = 2
 
-# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
+# (int) Display warning if buildozer is run as root
 warn_on_root = 1
