@@ -34,16 +34,18 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 
-      - name: Install Buildozer
+      - name: Install Buildozer & Cython
         run: |
           pip install --upgrade "pip<24.1" "setuptools<70.0.0" wheel
           pip install "cython<3.0.0" git+https://github.com/kivy/buildozer.git
 
-      - name: Accept SDK Licenses
+      - name: Pre-accept Android SDK Licenses
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
           yes | sdkmanager --licenses || true
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          cp -r /usr/local/lib/android/sdk/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
 
       - name: Build Android APK
         run: |
