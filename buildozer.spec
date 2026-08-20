@@ -1,63 +1,58 @@
 [app]
 
-# Application name
-title = Advanced AI Analytics
+# (str) Title of your application
+title = OKWin AI Predictor
 
-# Package name
-package.name = advancedanalytics
+# (str) Package name
+package.name = okwinpredictor
 
-# Package domain
-package.domain = org.example
+# (str) Package domain (needed for android packaging)
+package.domain = org.test
 
-# Source directory
+# (str) Source code where the main.py lives
 source.dir = .
 
-# Python file
-source.main = main.py
+# (list) Source files to include (let empty to include all the files)
+source.include_exts = py,png,jpg,kv,atlas
 
-# Application version
-version = 1.0
+# (str) Application versioning
+version = 0.1
 
-# Required Python packages
-requirements = python3,kivy
+# (list) Application requirements
+# comma separated e.g. requirements = sqlite3,kivy
+requirements = python3,kivy==2.2.1,requests,urllib3,charset_normalizer,idna
 
-# Screen orientation
+# (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
 
-# Android settings
+# (bool) Indicate if the application should be fullscreen
 fullscreen = 0
 
-# Android API
-android.api = 35
-android.minapi = 23
+# (int) Target Android API, should be as high as possible.
+android.api = 33
 
-# Android architecture
+# (int) Minimum API your APK / AAB will support.
+android.minapi = 21
+
+# (int) Android NDK version to use
+android.ndk = 25b
+
+# (bool) Android logcat filters to use
+android.logcat_filters = *:S python:D
+
+# (bool) Copy library instead of making a libpymodules.so
+android.copy_libs = 1
+
+# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 android.archs = arm64-v8a
 
-# Android permissions
-android.permissions = INTERNET
-
-# Keep build output
-android.release_artifact = %(name)s-%(version)s-release.apk
-android.debug_artifact = %(name)s-%(version)s-debug.apk
-
-# Android backup
+# (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
-
-# Log level
-log_level = 2
-
 
 [buildozer]
 
-# Build directory
-build_dir = .buildozer
-
-# Output directory
-bin_dir = bin
-
-# Verbose logging
+# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 2
 
-# Warning timeout
-warn_on_root = 0
+# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
+warn_on_root = 1
