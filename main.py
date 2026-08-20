@@ -12,10 +12,12 @@ from kivy.core.window import Window
 import random
 from collections import Counter
 
+
 Window.clearcolor = (0.035, 0.04, 0.055, 1)
 
 
 class Card(BoxLayout):
+
     def __init__(self, **kwargs):
         super().__init__(
             orientation="vertical",
@@ -34,9 +36,12 @@ class Card(BoxLayout):
                 radius=[dp(14)]
             )
 
-        self.bind(pos=self.update_bg, size=self.update_bg)
+        self.bind(
+            pos=self.update_background,
+            size=self.update_background
+        )
 
-    def update_bg(self, *_):
+    def update_background(self, *_):
         self.background.pos = self.pos
         self.background.size = self.size
 
@@ -44,6 +49,7 @@ class Card(BoxLayout):
 class Dashboard(BoxLayout):
 
     def __init__(self, **kwargs):
+
         super().__init__(
             orientation="vertical",
             padding=dp(12),
@@ -52,24 +58,39 @@ class Dashboard(BoxLayout):
         )
 
         self.history = []
+
+        # 60-second result lock
+        self.current_result = None
+        self.seconds_left = 0
+        self.timer_event = None
+
         self.build_ui()
 
+    # --------------------------------------------------
+    # LABEL HELPER
+    # --------------------------------------------------
+
     def make_label(self, text, size=14, bold=False):
+
         return Label(
             text=text,
             font_size=dp(size),
             bold=bold,
-            color=(0.9, 0.93, 0.97, 1),
+            color=(0.90, 0.93, 0.97, 1),
             halign="left",
             valign="middle"
         )
+
+    # --------------------------------------------------
+    # USER INTERFACE
+    # --------------------------------------------------
 
     def build_ui(self):
 
         # HEADER
         header = BoxLayout(
             size_hint_y=None,
-            height=dp(70),
+            height=dp(72),
             spacing=dp(8)
         )
 
@@ -90,7 +111,10 @@ class Dashboard(BoxLayout):
 
         self.add_widget(header)
 
+        # --------------------------------------------------
         # STAT CARDS
+        # --------------------------------------------------
+
         cards = GridLayout(
             cols=2,
             spacing=dp(10),
@@ -98,82 +122,105 @@ class Dashboard(BoxLayout):
             height=dp(230)
         )
 
-        # Status
+        # STATUS
         card = Card()
+
         card.add_widget(
-            self.make_label("SYSTEM STATUS", 10)
+            self.make_label(
+                "SYSTEM STATUS",
+                10
+            )
         )
 
         self.status = self.make_label(
             "READY",
-            20,
+            19,
             True
         )
 
         card.add_widget(self.status)
+
         cards.add_widget(card)
 
-        # Confidence
+        # CONFIDENCE
         card = Card()
+
         card.add_widget(
-            self.make_label("MODEL CONFIDENCE", 10)
+            self.make_label(
+                "MODEL CONFIDENCE",
+                10
+            )
         )
 
         self.confidence = self.make_label(
             "—",
-            25,
+            24,
             True
         )
 
         card.add_widget(self.confidence)
+
         cards.add_widget(card)
 
-        # Samples
+        # SAMPLES
         card = Card()
+
         card.add_widget(
-            self.make_label("DATA SAMPLES", 10)
+            self.make_label(
+                "DATA SAMPLES",
+                10
+            )
         )
 
         self.samples = self.make_label(
             "0",
-            25,
+            24,
             True
         )
 
         card.add_widget(self.samples)
+
         cards.add_widget(card)
 
-        # Distribution
+        # DISTRIBUTION
         card = Card()
+
         card.add_widget(
-            self.make_label("DISTRIBUTION", 10)
+            self.make_label(
+                "DISTRIBUTION",
+                10
+            )
         )
 
         self.distribution = self.make_label(
             "—",
-            13,
+            12,
             True
         )
 
         card.add_widget(self.distribution)
+
         cards.add_widget(card)
 
         self.add_widget(cards)
 
+        # --------------------------------------------------
         # BUTTONS
+        # --------------------------------------------------
+
         buttons = BoxLayout(
             size_hint_y=None,
             height=dp(55),
             spacing=dp(8)
         )
 
-        run_button = Button(
+        self.run_button = Button(
             text="RUN ANALYSIS",
             font_size=dp(15)
         )
 
-        run_button.bind(
-            on_release=lambda *_: self.run_analysis()
+        self.run_button.bind(
+            on_release=self.run_analysis
         )
 
         reset_button = Button(
@@ -182,15 +229,40 @@ class Dashboard(BoxLayout):
         )
 
         reset_button.bind(
-            on_release=lambda *_: self.reset()
+            on_release=self.reset
         )
 
-        buttons.add_widget(run_button)
-        buttons.add_widget(reset_button)
+        buttons.add_widget(
+            self.run_button
+        )
+
+        buttons.add_widget(
+            reset_button
+        )
 
         self.add_widget(buttons)
 
+        # --------------------------------------------------
+        # CURRENT RESULT
+        # --------------------------------------------------
+
+        self.result_label = self.make_label(
+            "NO RESULT",
+            25,
+            True
+        )
+
+        self.result_label.size_hint_y = None
+        self.result_label.height = dp(60)
+
+        self.add_widget(
+            self.result_label
+        )
+
+        # --------------------------------------------------
         # HISTORY TITLE
+        # --------------------------------------------------
+
         self.add_widget(
             self.make_label(
                 "RECENT ANALYSIS",
@@ -199,7 +271,10 @@ class Dashboard(BoxLayout):
             )
         )
 
+        # --------------------------------------------------
         # HISTORY
+        # --------------------------------------------------
+
         scroll = ScrollView()
 
         self.history_box = GridLayout(
@@ -209,16 +284,23 @@ class Dashboard(BoxLayout):
         )
 
         self.history_box.bind(
-            minimum_height=self.history_box.setter("height")
+            minimum_height=
+            self.history_box.setter("height")
         )
 
-        scroll.add_widget(self.history_box)
+        scroll.add_widget(
+            self.history_box
+        )
+
         self.add_widget(scroll)
 
+        # --------------------------------------------------
         # DISCLAIMER
+        # --------------------------------------------------
+
         note = self.make_label(
-            "Demo analytics only. Results are statistical estimates "
-            "from simulated data and are not guaranteed outcomes.",
+            "Demo analytics only. Results are simulated "
+            "statistical estimates and are not guaranteed outcomes.",
             10
         )
 
@@ -227,31 +309,61 @@ class Dashboard(BoxLayout):
 
         self.add_widget(note)
 
-    def run_analysis(self):
+    # --------------------------------------------------
+    # RUN ANALYSIS
+    # --------------------------------------------------
+
+    def run_analysis(self, *_):
+
+        # IMPORTANT:
+        # Result cannot change during 60-second lock.
+        if self.seconds_left > 0:
+
+            self.status.text = (
+                f"RESULT LOCKED • "
+                f"{self.seconds_left}s"
+            )
+
+            return
 
         self.status.text = "ANALYZING..."
+
+        self.run_button.disabled = True
 
         Clock.schedule_once(
             self.complete_analysis,
             1
         )
 
+    # --------------------------------------------------
+    # GENERATE RESULT
+    # --------------------------------------------------
+
     def complete_analysis(self, *_):
 
-        # Simulated dataset
-        data = [
-            random.choice(
-                ["RED", "GREEN", "VIOLET"]
+        # Simulated data
+        data = []
+
+        for _ in range(100):
+
+            data.append(
+                random.choice(
+                    [
+                        "RED",
+                        "GREEN",
+                        "VIOLET"
+                    ]
+                )
             )
-            for _ in range(100)
-        ]
 
         counts = Counter(data)
+
         total = len(data)
 
         probabilities = {
-            key: counts[key] / total
-            for key in counts
+            "RED": counts["RED"] / total,
+            "GREEN": counts["GREEN"] / total,
+            "VIOLET": counts["VIOLET"] / total
         }
 
         strongest = max(
@@ -259,10 +371,17 @@ class Dashboard(BoxLayout):
             key=probabilities.get
         )
 
-        confidence = probabilities[strongest] * 100
+        confidence = (
+            probabilities[strongest] * 100
+        )
 
-        # Update dashboard
-        self.status.text = "ANALYSIS COMPLETE"
+        # Save current result
+        self.current_result = strongest
+
+        # Dashboard update
+        self.status.text = (
+            "RESULT LOCKED • 60s"
+        )
 
         self.confidence.text = (
             f"{confidence:.1f}%"
@@ -276,7 +395,11 @@ class Dashboard(BoxLayout):
             f"VIOLET {probabilities['VIOLET'] * 100:.0f}%"
         )
 
-        # Add history
+        self.result_label.text = (
+            f"CURRENT RESULT: {strongest}"
+        )
+
+        # History
         self.history.insert(
             0,
             strongest
@@ -285,6 +408,61 @@ class Dashboard(BoxLayout):
         self.history = self.history[:15]
 
         self.update_history()
+
+        # Start exactly 60-second lock
+        self.seconds_left = 60
+
+        self.start_countdown()
+
+    # --------------------------------------------------
+    # START 60 SECOND COUNTDOWN
+    # --------------------------------------------------
+
+    def start_countdown(self):
+
+        if self.timer_event:
+
+            self.timer_event.cancel()
+
+        self.timer_event = Clock.schedule_interval(
+            self.update_countdown,
+            1
+        )
+
+        self.run_button.disabled = True
+
+    # --------------------------------------------------
+    # COUNTDOWN
+    # --------------------------------------------------
+
+    def update_countdown(self, dt):
+
+        if self.seconds_left > 0:
+
+            self.seconds_left -= 1
+
+            self.status.text = (
+                f"RESULT LOCKED • "
+                f"{self.seconds_left}s"
+            )
+
+        else:
+
+            if self.timer_event:
+
+                self.timer_event.cancel()
+
+                self.timer_event = None
+
+            self.status.text = (
+                "READY FOR NEXT CYCLE"
+            )
+
+            self.run_button.disabled = False
+
+    # --------------------------------------------------
+    # HISTORY
+    # --------------------------------------------------
 
     def update_history(self):
 
@@ -298,6 +476,7 @@ class Dashboard(BoxLayout):
             row = Card()
 
             row.height = dp(48)
+
             row.orientation = "horizontal"
 
             row.add_widget(
@@ -316,27 +495,58 @@ class Dashboard(BoxLayout):
                 )
             )
 
-            self.history_box.add_widget(row)
+            self.history_box.add_widget(
+                row
+            )
 
-    def reset(self):
+    # --------------------------------------------------
+    # RESET
+    # --------------------------------------------------
+
+    def reset(self, *_):
+
+        if self.timer_event:
+
+            self.timer_event.cancel()
+
+            self.timer_event = None
 
         self.history = []
 
+        self.current_result = None
+
+        self.seconds_left = 0
+
         self.status.text = "READY"
+
         self.confidence.text = "—"
+
         self.samples.text = "0"
+
         self.distribution.text = "—"
+
+        self.result_label.text = (
+            "NO RESULT"
+        )
+
+        self.run_button.disabled = False
 
         self.history_box.clear_widgets()
 
+
+# ======================================================
+# APP
+# ======================================================
 
 class AdvancedAnalyticsApp(App):
 
     title = "Advanced AI Analytics"
 
     def build(self):
+
         return Dashboard()
 
 
 if __name__ == "__main__":
+
     AdvancedAnalyticsApp().run()
