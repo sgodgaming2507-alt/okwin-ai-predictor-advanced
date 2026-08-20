@@ -39,16 +39,17 @@ jobs:
           pip install --upgrade "pip<24.1" "setuptools<70.0.0" wheel
           pip install "cython<3.0.0" buildozer
 
-      - name: Accept Licenses & Link SDK
+      - name: Setup Android SDK Licenses & Pre-cache
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          yes | sdkmanager --licenses || true
+          mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          cp -rf /usr/local/lib/android/sdk/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ || true
+          yes | sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools" || true
 
       - name: Build Android APK
-        env:
-          ANDROIDSDK: ${{ env.ANDROID_HOME }}
-          ANDROIDNDK: ${{ env.ANDROID_NDK_LATEST_HOME }}
         run: |
           export CI=true
           export BUILDOZER_ALLOW_ROOT=1
